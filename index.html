@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>عالمي الرقمي | بورتفوليو نيوني</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;500;700;900&family=Orbitron:wght@600;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-dark: #05050a;
+      --bg-card: rgba(15, 16, 32, 0.65);
+      --neon-cyan: #00f3ff;
+      --neon-pink: #ff007f;
+      --neon-purple: #9d00ff;
+      --neon-green: #39ff14;
+      --text-main: #f0f4ff;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: 'Cairo', sans-serif;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* Custom Neon Cursor */
+    .cursor-dot, .cursor-ring {
+      position: fixed;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      border-radius: 50%;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+    }
+    .cursor-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--neon-cyan);
+      box-shadow: 0 0 12px var(--neon-cyan), 0 0 24px var(--neon-cyan);
+    }
+    .cursor-ring {
+      width: 36px;
+      height: 36px;
+      border: 2px solid var(--neon-pink);
+      box-shadow: 0 0 15px rgba(255, 0, 127, 0.5);
+      transition: width 0.2s, height 0.2s, border-color 0.2s;
+    }
+    @media (hover: none) and (pointer: coarse) {
+      body { cursor: auto; }
+      .cursor-dot, .cursor-ring { display: none; }
+    }
+
+    /* Interactive Particle Canvas */
+    #bg-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+    }
+
+    /* Cyber Grid Overlay */
+    .cyber-grid {
+      position: fixed;
+      inset: 0;
+      background-image: 
+        linear-gradient(rgba(0, 243, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 243, 255, 0.04) 1px, transparent 1px);
+      background-size: 50px 50px;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* Container & Sections */
+    .container {
+      max-width: 1150px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    section {
+      min-height: 100vh;
+      padding: 100px 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+    }
+
+    /* Floating HUD Dock Navigation */
+    .hud-dock {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(10, 12, 24, 0.8);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(0, 243, 255, 0.3);
+      box-shadow: 0 0 25px rgba(0, 243, 255, 0.15), inset 0 0 15px rgba(157, 0, 255, 0.15);
+      border-radius: 50px;
+      padding: 10px 24px;
+      display: flex;
+      gap: 20px;
+      z-index: 1000;
+    }
+
+    .hud-dock a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 30px;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .hud-dock a:hover, .hud-dock a.active {
+      color: #fff;
+      background: rgba(0, 243, 255, 0.15);
+      text-shadow: 0 0 10px var(--neon-cyan);
+      box-shadow: 0 0 15px rgba(0, 243, 255, 0.3);
+    }
+
+    /* Hero Section */
+    .hero {
+      text-align: center;
+      align-items: center;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 20px;
+      border-radius: 50px;
+      border: 1px solid var(--neon-green);
+      background: rgba(57, 255, 20, 0.08);
+      color: var(--neon-green);
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 30px;
+      box-shadow: 0 0 15px rgba(57, 255, 20, 0.2);
+    }
+
+    .pulse-dot {
+      width: 10px;
+      height: 10px;
+      background: var(--neon-green);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--neon-green);
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.5); opacity: 0.5; }
+    }
+
+    /* Glitch Title */
+    .glitch-title {
+      font-size: clamp(2.8rem, 7vw, 5.5rem);
+      font-weight: 900;
+      position: relative;
+      color: #fff;
+      text-shadow: 0 0 20px rgba(0, 243, 255, 0.6);
+      margin-bottom: 16px;
+      letter-spacing: -1px;
+    }
+
+    .glitch-title::before,
+    .glitch-title::after {
+      content: attr(data-text);
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .glitch-title::before {
+      color: var(--neon-pink);
+      z-index: -1;
+      animation: glitch-1 2.5s infinite linear alternate-reverse;
+    }
+
+    .glitch-title::after {
+      color: var(--neon-cyan);
+      z-index: -2;
+      animation: glitch-2 3s infinite linear alternate-reverse;
+    }
+
+    @keyframes glitch-1 {
+      0%, 90%, 100% { clip-path: inset(0 0 0 0); transform: translate(0); }
+      92% { clip-path: inset(10% 0 60% 0); transform: translate(-4px, 2px); }
+      94% { clip-path: inset(50% 0 20% 0); transform: translate(4px, -2px); }
+      96% { clip-path: inset(80% 0 5% 0); transform: translate(-3px, 1px); }
+    }
+    @keyframes glitch-2 {
+      0%, 88%, 100% { clip-path: inset(0 0 0 0); transform: translate(0); }
+      90% { clip-path: inset(30% 0 40% 0); transform: translate(4px, 2px); }
+      93% { clip-path: inset(5% 0 75% 0); transform: translate(-4px, -2px); }
+    }
+
+    .typewriter-box {
+      font-size: clamp(1.2rem, 3vw, 1.8rem);
+      color: var(--neon-cyan);
+      font-weight: 500;
+      min-height: 2.5rem;
+      margin-bottom: 35px;
+      text-shadow: 0 0 12px rgba(0, 243, 255, 0.5);
+    }
+
+    .cursor-blink {
+      animation: blink 0.8s infinite;
+      color: var(--neon-pink);
+    }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+    .hero-buttons {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .neon-btn {
+      padding: 14px 34px;
+      font-family: 'Cairo', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      border-radius: 12px;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      cursor: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+      color: #fff;
+      border: none;
+      box-shadow: 0 0 25px rgba(0, 243, 255, 0.4);
+    }
+    .btn-primary:hover {
+      transform: translateY(-4px) scale(1.03);
+      box-shadow: 0 0 40px rgba(0, 243, 255, 0.7);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--neon-pink);
+      border: 2px solid var(--neon-pink);
+      box-shadow: 0 0 15px rgba(255, 0, 127, 0.25), inset 0 0 15px rgba(255, 0, 127, 0.1);
+    }
+    .btn-outline:hover {
+      background: var(--neon-pink);
+      color: #fff;
+      box-shadow: 0 0 35px rgba(255, 0, 127, 0.7);
+      transform: translateY(-4px);
+    }
+
+    /* Section Headers */
+    .section-header {
+      margin-bottom: 50px;
+    }
+    .section-tag {
+      font-family: 'Orbitron', sans-serif;
+      color: var(--neon-pink);
+      font-size: 0.9rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 8px;
+      text-shadow: 0 0 10px var(--neon-pink);
+    }
+    .section-title {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 900;
+      background: linear-gradient(90deg, #fff, var(--neon-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Personality / About HUD */
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.3fr;
+      gap: 40px;
+      align-items: center;
+    }
+    @media (max-width: 850px) {
+      .about-grid { grid-template-columns: 1fr; }
+    }
+
+    .cyber-avatar-frame {
+      position: relative;
+      padding: 25px;
+      border-radius: 24px;
+      background: var(--bg-card);
+      border: 1px solid rgba(0, 243, 255, 0.3);
+      box-shadow: 0 0 40px rgba(157, 0, 255, 0.2);
+      text-align: center;
+    }
+
+    .avatar-circle {
+      width: 200px;
+      height: 200px;
+      margin: 0 auto 20px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-pink), var(--neon-purple));
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .avatar-inner {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: #0b0c18;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4rem;
+    }
+
+    .traits-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 15px;
+    }
+    .trait-pill {
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      background: rgba(157, 0, 255, 0.15);
+      border: 1px solid var(--neon-purple);
+      color: #e9d5ff;
+      box-shadow: 0 0 10px rgba(157, 0, 255, 0.25);
+    }
+
+    .about-text p {
+      font-size: 1.15rem;
+      line-height: 1.9;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+    .about-text strong {
+      color: var(--neon-cyan);
+    }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+    }
+    .stat-box {
+      background: var(--bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 18px;
+      border-radius: 16px;
+      text-align: center;
+      transition: 0.3s;
+    }
+    .stat-box:hover {
+      border-color: var(--neon-cyan);
+      box-shadow: 0 0 20px rgba(0, 243, 255, 0.2);
+      transform: translateY(-4px);
+    }
+    .stat-num {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--neon-pink);
+      text-shadow: 0 0 12px rgba(255, 0, 127, 0.6);
+    }
+
+    /* 3D Tilt Neon Cards (What I Do & Creations) */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 28px;
+    }
+
+    .neon-card {
+      position: relative;
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      border-radius: 20px;
+      padding: 32px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: transform 0.15s ease-out, box-shadow 0.3s ease;
+      transform-style: preserve-3d;
+      overflow: hidden;
+    }
+
+    .neon-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(
+        400px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(0, 243, 255, 0.18),
+        transparent 60%
+      );
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+
+    .neon-card:hover::before {
+      opacity: 1;
+    }
+
+    .neon-card:hover {
+      border-color: rgba(0, 243, 255, 0.5);
+      box-shadow: 0 0 30px rgba(0, 243, 255, 0.15);
+    }
+
+    .card-icon {
+      font-size: 2.5rem;
+      margin-bottom: 18px;
+      display: inline-block;
+      filter: drop-shadow(0 0 12px var(--neon-cyan));
+    }
+
+    .neon-card h3 {
+      font-size: 1.4rem;
+      margin-bottom: 12px;
+      color: #fff;
+    }
+
+    .neon-card p {
+      color: var(--text-muted);
+      line-height: 1.7;
+      font-size: 0.98rem;
+      margin-bottom: 20px;
+    }
+
+    .tags-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .tech-tag {
+      font-size: 0.8rem;
+      padding: 4px 12px;
+      border-radius: 8px;
+      background: rgba(0, 243, 255, 0.1);
+      color: var(--neon-cyan);
+      border: 1px solid rgba(0, 243, 255, 0.25);
+    }
+
+    /* Timeline (What I've Done) */
+    .timeline {
+      position: relative;
+      padding-right: 35px;
+      border-right: 2px solid rgba(0, 243, 255, 0.3);
+    }
+
+    .timeline-item {
+      position: relative;
+      margin-bottom: 45px;
+      background: var(--bg-card);
+      padding: 25px 30px;
+      border-radius: 18px;
+      border: 1px solid rgba(255, 0, 127, 0.2);
+      transition: 0.3s;
+    }
+
+    .timeline-item:hover {
+      border-color: var(--neon-pink);
+      box-shadow: 0 0 25px rgba(255, 0, 127, 0.2);
+      transform: translateX(-6px);
+    }
+
+    .timeline-node {
+      position: absolute;
+      right: -45px;
+      top: 28px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--bg-dark);
+      border: 3px solid var(--neon-cyan);
+      box-shadow: 0 0 15px var(--neon-cyan);
+    }
+
+    .timeline-date {
+      font-family: 'Orbitron', sans-serif;
+      color: var(--neon-green);
+      font-size: 0.9rem;
+      margin-bottom: 6px;
+      display: inline-block;
+    }
+
+    /* Contact Section */
+    .contact-box {
+      background: linear-gradient(145deg, rgba(15, 16, 32, 0.9), rgba(25, 10, 40, 0.8));
+      border: 1px solid rgba(157, 0, 255, 0.4);
+      border-radius: 24px;
+      padding: 50px;
+      text-align: center;
+      box-shadow: 0 0 50px rgba(157, 0, 255, 0.15);
+    }
+
+    .social-links {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-top: 30px;
+    }
+
+    .social-chip {
+      padding: 12px 24px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(0, 243, 255, 0.3);
+      color: #fff;
+      text-decoration: none;
+      font-weight: 700;
+      transition: 0.3s;
+    }
+
+    .social-chip:hover {
+      background: var(--neon-cyan);
+      color: #05050a;
+      box-shadow: 0 0 25px var(--neon-cyan);
+      transform: translateY(-4px);
+    }
+
+    .social-chip.whatsapp:hover {
+      background: var(--neon-green);
+      border-color: var(--neon-green);
+      box-shadow: 0 0 25px var(--neon-green);
+    }
+
+    /* Scroll Reveal */
+    .reveal {
+      opacity: 0;
+      transform: translateY(35px);
+      transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 600px) {
+      .hud-dock {
+        width: 92%;
+        justify-content: space-around;
+        gap: 4px;
+        padding: 8px 10px;
+      }
+      .hud-dock a { font-size: 0.78rem; padding: 6px 8px; }
+      .contact-box { padding: 30px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Custom Cursor -->
+  <div class="cursor-dot"></div>
+  <div class="cursor-ring"></div>
+
+  <!-- Background Effects -->
+  <canvas id="bg-canvas"></canvas>
+  <div class="cyber-grid"></div>
+
+  <!-- Floating HUD Navigation -->
+  <nav class="hud-dock">
+    <a href="#hero" class="active">البداية</a>
+    <a href="#about">شخصيتي</a>
+    <a href="#work">ماذا أعمل</a>
+    <a href="#journey">مسيرتي</a>
+    <a href="#creations">ماذا صنعت</a>
+    <a href="#contact">تواصل</a>
+  </nav>
+
+  <div class="container">
+
+    <!-- 1. HERO SECTION -->
+    <section id="hero" class="hero">
+      <div class="status-badge">
+        <span class="pulse-dot"></span>
+        <span>متصل بالمستقبل • متاح لمشاريع استثنائية</span>
+      </div>
+
+      <h1 class="glitch-title" data-text="اسـمـك الـكـامـل">اسـمـك الـكـامـل</h1>
+
+      <div class="typewriter-box">
+        <span id="typewriter"></span><span class="cursor-blink">|</span>
+      </div>
+
+      <div class="hero-buttons">
+        <a href="#creations" class="neon-btn btn-primary">استكشف ما صنعت</a>
+        <a href="#about" class="neon-btn btn-outline">اكتشف شخصيتي</a>
+      </div>
+    </section>
+
+    <!-- 2. PERSONALITY / ABOUT SECTION -->
+    <section id="about" class="reveal">
+      <div class="section-header">
+        <span class="section-tag">// 01. IDENTITY_CORE</span>
+        <h2 class="section-title">شخصيتي وفلسفتي</h2>
+      </div>
+
+      <div class="about-grid">
+        <div class="cyber-avatar-frame">
+          <div class="avatar-circle">
+            <div class="avatar-inner">⚡</div>
+          </div>
+          <h3>المُبدع الرقمي</h3>
+          <p style="color: var(--neon-cyan); font-size: 0.9rem;">شغوف بالابتكار وكسر القوالب التقليدية</p>
+          <div class="traits-list">
+            <span class="trait-pill">تفكير خارج الصندوق</span>
+            <span class="trait-pill">مهووس بالتفاصيل</span>
+            <span class="trait-pill">سريع التعلم</span>
+            <span class="trait-pill">صانع حلول</span>
+          </div>
+        </div>
+
+        <div class="about-text">
+          <p>
+            مرحباً بك في مساحتي الخاصة. أنا شخص لا يؤمن بالحلول العادية أو التصاميم المكررة. أجمع بين <strong>الخيال الإبداعي</strong> و<strong>الدقة التقنية</strong> لتحويل الأفكار الجريئة إلى تجارب رقمية حية تترك أثراً لا يُنسى.
+          </p>
+          <p>
+            أؤمن بأن كل مشروع هو فرصة لبناء عالم مصغر ينبض بالحياة، سواء كان تطبيقاً ذكياً، موقعاً تفاعلياً، أو منتجاً تقنياً يحل مشكلة حقيقية بأسلوب ممتع.
+          </p>
+
+          <div class="stats-row">
+            <div class="stat-box">
+              <div class="stat-num">+5</div>
+              <div>سنوات شغف</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-num">+30</div>
+              <div>مشروع منجز</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-num">100%</div>
+              <div>طاقة إبداعية</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. WHAT I DO -->
+    <section id="work" class="reveal">
+      <div class="section-header">
+        <span class="section-tag">// 02. CAPABILITIES</span>
+        <h2 class="section-title">ماذا أعمل</h2>
+      </div>
+
+      <div class="cards-grid">
+        <div class="neon-card tilt-card">
+          <span class="card-icon">🚀</span>
+          <h3>تطوير تجارب الويب</h3>
+          <p>أبني مواقع وتطبيقات ويب تفاعلية سريعة، مليئة بالحركات السلسة والتفاصيل البصرية التي تخطف الأنظار.</p>
+          <div class="tags-wrap">
+            <span class="tech-tag">UI/UX</span>
+            <span class="tech-tag">Frontend</span>
+            <span class="tech-tag">Animations</span>
+          </div>
+        </div>
+
+        <div class="neon-card tilt-card">
+          <span class="card-icon">🧠</span>
+          <h3>هندسة الأفكار والمنتجات</h3>
+          <p>أحول الفكرة المجردة إلى منتج متكامل، بدءاً من رسم التجربة وحتى إطلاق النسخة النهائية القابلة للنمو.</p>
+          <div class="tags-wrap">
+            <span class="tech-tag">Product Design</span>
+            <span class="tech-tag">Strategy</span>
+            <span class="tech-tag">AI Tools</span>
+          </div>
+        </div>
+
+        <div class="neon-card tilt-card">
+          <span class="card-icon">🎨</span>
+          <h3>الهوية البصرية المستقبلية</h3>
+          <p>تصميم واجهات وتجارب مستخدم بأسلوب جريء وعصري يجمع بين الألوان النيونية والوضوح التام.</p>
+          <div class="tags-wrap">
+            <span class="tech-tag">Branding</span>
+            <span class="tech-tag">Motion</span>
+            <span class="tech-tag">3D Web</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. WHAT I'VE DONE (JOURNEY) -->
+    <section id="journey" class="reveal">
+      <div class="section-header">
+        <span class="section-tag">// 03. TIMELINE_LOG</span>
+        <h2 class="section-title">ماذا عملت (مسيرتي)</h2>
+      </div>
+
+      <div class="timeline">
+        <div class="timeline-item">
+          <span class="timeline-node"></span>
+          <span class="timeline-date">2024 - الآن</span>
+          <h3>مطور ومصمم تجارب مستقلة (Freelancer / Founder)</h3>
+          <p style="color: var(--text-muted); margin-top: 8px;">
+            قيادة وتنفيذ مشاريع رقمية مبتكرة للعملاء، والتركيز على دمج الذكاء الاصطناعي مع واجهات المستخدم التفاعلية.
+          </p>
+        </div>
+
+        <div class="timeline-item">
+          <span class="timeline-node"></span>
+          <span class="timeline-date">2022 - 2024</span>
+          <h3>مطور واجهات وتجارب رقمية في شركة تقنية</h3>
+          <p style="color: var(--text-muted); margin-top: 8px;">
+            تطوير أنظمة ومنصات استخدمها آلاف المستخدمين يومياً، مع تحسين سرعة الأداء بنسبة 45% وبناء مكتبة مكونات متكاملة.
+          </p>
+        </div>
+
+        <div class="timeline-item">
+          <span class="timeline-node"></span>
+          <span class="timeline-date">2020 - 2022</span>
+          <h3>بداية الشغف وبناء التجارب الأولى</h3>
+          <p style="color: var(--text-muted); margin-top: 8px;">
+            الغوص في عالم البرمجة والتصميم، إطلاق أول 10 تجارب مفتوحة المصدر والمشاركة في هاكاثونات تقنية.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. WHAT I'VE BUILT (CREATIONS) -->
+    <section id="creations" class="reveal">
+      <div class="section-header">
+        <span class="section-tag">// 04. ARTIFACTS_BUILT</span>
+        <h2 class="section-title">ماذا صنعت (إنجازاتي)</h2>
+      </div>
+
+      <div class="cards-grid">
+        <div class="neon-card tilt-card">
+          <span class="card-icon">🌌</span>
+          <h3>منصة "نيبولا" التفاعلية</h3>
+          <p>تطبيق ويب يعتمد على الرسوميات التفاعلية لإدارة المشاريع بأسلوب بصري مستوحى من ألعاب الخيال العلمي.</p>
+          <div class="tags-wrap">
+            <span class="tech-tag">تفاعلي</span>
+            <span class="tech-tag">WebGL</span>
+            <span class="tech-tag">إنتاجية</span>
+          </div>
+        </div>
+
+        <div class="neon-card tilt-card">
+          <span class="card-icon">🤖</span>
+          <h3>مساعد ذكاء اصطناعي مخصص</h3>
+          <p>أداة ذكية تقوم بأتمتة المهام اليومية وتحليل البيانات بسرعة فائقة مع لوحة تحكم نيونية حية.</p>
+          <div class="tags-wrap">
+            <span class="tech-tag">AI</span>
+            <span class="tech-tag">Automation</span>
+            <span class="tech-tag">Dashboard</span>
+          </div>
+        </div>
+
+        <div class="neon-card tilt-card">
+          <span class="card-icon">⚡</span>
+          <h3>مكتبة حركات وتأثيرات عربية</h3>
+          <p>حزمة أدوات مفتوحة المصدر تساعد المطورين العرب على إضافة مؤثرات بصرية مبهرة لمواقعهم بسهولة.</p>
+          <div class="tags-wrap">
+            <span class="tech-tag">Open Source</span>
+            <span class="tech-tag">CSS/JS</span>
+            <span class="tech-tag">RTL</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. CONTACT -->
+    <section id="contact" class="reveal" style="min-height: 70vh;">
+      <div class="contact-box">
+        <span class="section-tag">// 05. ESTABLISH_LINK</span>
+        <h2 class="section-title" style="margin-bottom: 16px;">هل لديك فكرة مجنونة؟ لنصنعها معاً</h2>
+        <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto; font-size: 1.1rem;">
+          أنا دائماً متحمس للتعرف على أشخاص طموحين والعمل على مشاريع تتحدى المألوف. أرسل لي إشارة وسأرد عليك فوراً.
+        </p>
+
+        <div class="social-links">
+          <a href="mailto:aa6588714@gmail.com" class="social-chip">📧 البريد الإلكتروني: aa6588714@gmail.com</a>
+          <a href="https://wa.me/9647717535517" target="_blank" rel="noopener noreferrer" class="social-chip whatsapp">💬 التواصل عبر الواتساب: 07717535517</a>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    // 1. Custom Cursor Logic
+    const dot = document.querySelector('.cursor-dot');
+    const ring = document.querySelector('.cursor-ring');
+    let mouseX = 0, mouseY = 0, ringX = 0, ringY = 0;
+
+    window.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      dot.style.left = mouseX + 'px';
+      dot.style.top = mouseY + 'px';
+    });
+
+    function animateCursor() {
+      ringX += (mouseX - ringX) * 0.18;
+      ringY += (mouseY - ringY) * 0.18;
+      ring.style.left = ringX + 'px';
+      ring.style.top = ringY + 'px';
+      requestAnimationFrame(animateCursor);
+    }
+    animateCursor();
+
+    document.querySelectorAll('a, button, .neon-card').forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        ring.style.width = '54px';
+        ring.style.height = '54px';
+        ring.style.borderColor = '#00f3ff';
+      });
+      el.addEventListener('mouseleave', () => {
+        ring.style.width = '36px';
+        ring.style.height = '36px';
+        ring.style.borderColor = '#ff007f';
+      });
+    });
+
+    // 2. Typewriter Effect
+    const phrases = [
+      "صانع تجارب رقمية غير تقليدية ⚡",
+      "مطور ومصمم يجمع بين الفن والبرمجة 🎨",
+      "أحوّل الأفكار الجريئة إلى واقع مبهر 🚀"
+    ];
+    let pIndex = 0, cIndex = 0, isDeleting = false;
+    const typeEl = document.getElementById('typewriter');
+
+    function typeLoop() {
+      const current = phrases[pIndex];
+      typeEl.textContent = isDeleting
+        ? current.substring(0, cIndex--)
+        : current.substring(0, cIndex++);
+
+      let speed = isDeleting ? 40 : 80;
+
+      if (!isDeleting && cIndex === current.length + 1) {
+        speed = 1800;
+        isDeleting = true;
+      } else if (isDeleting && cIndex === 0) {
+        isDeleting = false;
+        pIndex = (pIndex + 1) % phrases.length;
+        speed = 400;
+      }
+      setTimeout(typeLoop, speed);
+    }
+    typeLoop();
+
+    // 3. 3D Tilt & Spotlight Cards
+    document.querySelectorAll('.tilt-card').forEach(card => {
+      card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        card.style.setProperty('--mouse-x', `${x}px`);
+        card.style.setProperty('--mouse-y', `${y}px`);
+
+        const rotateY = ((x / rect.width) - 0.5) * 14;
+        const rotateX = ((y / rect.height) - 0.5) * -14;
+        card.style.transform = `perspective(900px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+      });
+
+      card.addEventListener('mouseleave', () => {
+        card.style.transform = `perspective(900px) rotateX(0deg) rotateY(0deg) scale(1)`;
+      });
+    });
+
+    // 4. Interactive Neon Particle Network Canvas
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas.getContext('2d');
+    let width, height, particles = [];
+
+    function resize() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    class Particle {
+      constructor() {
+        this.x = Math.random() * width;
+        this.y = Math.random() * height;
+        this.vx = (Math.random() - 0.5) * 0.7;
+        this.vy = (Math.random() - 0.5) * 0.7;
+        this.radius = Math.random() * 2 + 1;
+        this.color = Math.random() > 0.5 ? '#00f3ff' : '#ff007f';
+      }
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        if (this.x < 0 || this.x > width) this.vx *= -1;
+        if (this.y < 0 || this.y > height) this.vy *= -1;
+
+        const dx = this.x - mouseX;
+        const dy = this.y - mouseY;
+        const dist = Math.hypot(dx, dy);
+        if (dist < 120) {
+          this.x += dx / dist * 1.5;
+          this.y += dy / dist * 1.5;
+        }
+      }
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = this.color;
+        ctx.fill();
+      }
+    }
+
+    const particleCount = window.innerWidth < 700 ? 40 : 75;
+    for (let i = 0; i < particleCount; i++) particles.push(new Particle());
+
+    function animateCanvas() {
+      ctx.clearRect(0, 0, width, height);
+      for (let i = 0; i < particles.length; i++) {
+        particles[i].update();
+        particles[i].draw();
+        for (let j = i + 1; j < particles.length; j++) {
+          const dist = Math.hypot(particles[i].x - particles[j].x, particles[i].y - particles[j].y);
+          if (dist < 130) {
+            ctx.beginPath();
+            ctx.strokeStyle = `rgba(0, 243, 255, ${1 - dist / 130})`;
+            ctx.lineWidth = 0.6;
+            ctx.shadowBlur = 0;
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.stroke();
+          }
+        }
+      }
+      requestAnimationFrame(animateCanvas);
+    }
+    animateCanvas();
+
+    // 5. Scroll Reveal & Active Dock Highlight
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.15 });
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    const sections = document.querySelectorAll('section');
+    const navLinks = document.querySelectorAll('.hud-dock a');
+    window.addEventListener('scroll', () => {
+      let current = '';
+      sections.forEach(sec => {
+        if (window.scrollY >= sec.offsetTop - 250) current = sec.getAttribute('id');
+      });
+      navLinks.forEach(a => {
+        a.classList.toggle('active', a.getAttribute('href') === `#${current}`);
+      });
+    });
+  </script>
+</body>
+</html>
